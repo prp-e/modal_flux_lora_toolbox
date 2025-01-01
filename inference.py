@@ -110,7 +110,7 @@ class Model:
         pipeline.fuse_lora(lora_scale = 1.0)
 
         out = pipeline(
-            f"{prompt}, atelier_sks_768",
+            f"{prompt}",
             output_type="pil",
             num_inference_steps=NUM_INFERENCE_STEPS,
             width=width,
