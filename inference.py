@@ -78,6 +78,8 @@ class Model:
         from huggingface_hub import snapshot_download
         from transformers.utils import move_cache
 
+        #can be replaced with flux-dev repo
+
         snapshot_download(f"mann-e/mann-e_flux")
 
         move_cache()
