@@ -1,0 +1,3 @@
+# Modal FLUX LoRA toolkit
+
+Have you ever wondered why [Fal AI](https://fal.ai)'s LoRA trainer is so fast? I recently was working on [Atelier AI](https://atelierai.me) which is an equivalent of PhotoAI for Iranian/Persian speaking users and I needed to make the train procedure fast. I first wanted to use Fal AI, but I realized that $2 per train is too much for me. In the other hand, I could use [Modal](https://modal.com) in order to do my training and stuff. 
