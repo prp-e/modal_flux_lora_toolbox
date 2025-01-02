@@ -39,3 +39,6 @@ modal run inference.py \
 ``` 
 
 ## Notes
+
+- Since [Atelier AI](https://atelierai.me) is a part of my bigger startup [Mann-E](https://mann-e.com), the model is set to `mann-e/mann-e_flux`. You easily can change it to your desired FLUX based checkpoint. 
+- The training configuration uploads trained LoRA (in this case, LoKR) on HuggingFace automatically. You can use the same weight on Fal AI, Replicate, Self-Hosted Forge or anywhere you have the ability to use LoRAs. 
