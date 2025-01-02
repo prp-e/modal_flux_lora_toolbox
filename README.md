@@ -21,6 +21,8 @@ So I did a lot of research personally to find out these tips about making train 
 - Setting up your HF token on modal. 
 - Enough time and courage for your AI weekend project!
 
-## How to use infrernece 
+## How to use training configuration
 
 Please check AI Toolkit's documentations in order to find out how to use modal trainer script. I just provided the YAML file for configuring your model. Also do not forget to update the config file with true values.
+
+## How to use inference
