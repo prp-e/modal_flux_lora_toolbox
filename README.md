@@ -8,3 +8,7 @@ So I did a lot of research personally to find out these tips about making train 
 - We only can use one or two layers of LoRA in order to fit our concepts in it (if you see [config_example.yaml](./config_example.yaml) file, you will notice I've used 4.)
 - If we disable sampling, we can make it even faster. 
 - On powerful GPU's such as _A100 80GB_ or _H100_ we won't need to worry about `lowvram` and we can disable it (and therefore make the process faster.)
+
+<p align="center">
+    <img src="https://mann-e-images.storage.c2.liara.space/a0746ff2-5c47-43b0-af5f-f88cdc7f4442.jpg" width=640px>
+</p>
