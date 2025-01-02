@@ -34,7 +34,7 @@ modal run inference.py \
 --prompt "a cat" \
 --width 1024 \
 --height 1024 \
---lora HF_USERNAME/MODEL_NAME \
+--lora "HF_USERNAME/MODEL_NAME" \
 --filename "my_amazing_image"
 ``` 
 
