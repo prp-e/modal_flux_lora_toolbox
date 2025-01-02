@@ -12,3 +12,9 @@ So I did a lot of research personally to find out these tips about making train 
 <p align="center">
     <img src="https://mann-e-images.storage.c2.liara.space/a0746ff2-5c47-43b0-af5f-f88cdc7f4442.jpg" width=640px>
 </p>
+
+## What do you need for usig this project?
+
+- An account on [Modal](https://modal.com) with sufficient funds.
+- [Ostris' AI Toolkit](https://github.com/ostris/ai-toolkit)
+- Enough time and courage for your AI weekend project!
