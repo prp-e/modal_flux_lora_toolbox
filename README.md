@@ -26,3 +26,16 @@ So I did a lot of research personally to find out these tips about making train 
 Please check AI Toolkit's documentations in order to find out how to use modal trainer script. I just provided the YAML file for configuring your model. Also do not forget to update the config file with true values.
 
 ## How to use inference
+
+Just run the code like this:
+
+```
+modal run inference.py \
+--prompt "a cat" \
+--width 1024 \
+--height 1024 \
+--lora HF_USERNAME/MODEL_NAME \
+--filename "my_amazing_image"
+``` 
+
+## Notes
