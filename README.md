@@ -17,6 +17,8 @@ So I did a lot of research personally to find out these tips about making train 
 
 - An account on [Modal](https://modal.com) with sufficient funds.
 - [Ostris' AI Toolkit](https://github.com/ostris/ai-toolkit)
+- A [HuggingFace](https://huggingface.co) token with `read` permission. 
+- Setting up your HF token on modal. 
 - Enough time and courage for your AI weekend project!
 
 ## How to use infrernece 
