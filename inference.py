@@ -1,6 +1,5 @@
 import time
 from io import BytesIO
-from pathlib import Path
 import modal
 
 cuda_version = "12.4.0"
@@ -23,23 +22,26 @@ flux_image = (
         "libgl1",
     )
     .pip_install(
-        "invisible_watermark",
-        "transformers",
-        "huggingface_hub[hf_transfer]",
-        "accelerate",
-        "safetensors",
-        "sentencepiece",
+        "invisible_watermark==0.2.0",
+        "transformers==4.44.0",
+        "huggingface_hub[hf_transfer]==0.26.2",
+        "accelerate==0.33.0",
+        "safetensors==0.4.4",
+        "sentencepiece==0.2.0",
         f"git+https://github.com/huggingface/diffusers.git",
-        "numpy",
+        "numpy<2",
         "protobuf",
-        "peft"
+        "peft",
     )
-    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"})
+    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "HF_HUB_CACHE": "/cache"})
 )
 
 flux_image = flux_image.env(
-    {"TORCHINDUCTOR_CACHE_DIR": "/root/.inductor-cache"}
-).env({"TORCHINDUCTOR_FX_GRAPH_CACHE": "1"})
+    {
+        "TORCHINDUCTOR_CACHE_DIR": "/root/.inductor-cache",
+        "TORCHINDUCTOR_FX_GRAPH_CACHE": "1",
+    }
+)
 
 app = modal.App("example-flux-lora", image=flux_image)
 
@@ -47,8 +49,10 @@ with flux_image.imports():
     import torch
     from diffusers import DiffusionPipeline, AutoencoderTiny
 
+
 MINUTES = 60
 NUM_INFERENCE_STEPS = 16
+
 
 @app.cls(
     gpu="H100",
@@ -56,31 +60,26 @@ NUM_INFERENCE_STEPS = 16
     timeout=60 * MINUTES,
     secrets=[modal.Secret.from_name("huggingface-secret")],
     volumes={
+        "/cache": modal.Volume.from_name("hf-hub-cache", create_if_missing=True),
         "/root/.nv": modal.Volume.from_name("nv-cache", create_if_missing=True),
-        "/root/.triton": modal.Volume.from_name(
-            "triton-cache", create_if_missing=True
-        ),
-        "/root/.inductor-cache": modal.Volume.from_name(
-            "inductor-cache", create_if_missing=True
-        ),
+        "/root/.triton": modal.Volume.from_name("triton-cache", create_if_missing=True),
+        "/root/.inductor-cache": modal.Volume.from_name("inductor-cache", create_if_missing=True),
     },
 )
 class Model:
     compile: int = modal.parameter(default=0)
 
-    def setup_model(self):
-        from huggingface_hub import snapshot_download
-
-        snapshot_download(f"mann-e/mann-e_flux")
-
-        taef1 = AutoencoderTiny.from_pretrained("madebyollin/taef1", torch_dtype=torch.bfloat16)
-        pipe = DiffusionPipeline.from_pretrained("mann-e/mann-e_flux", torch_dtype=torch.bfloat16, vae=taef1)
-
-        return pipe
-
     @modal.enter()
     def enter(self):
-        pipe = self.setup_model()
+        from huggingface_hub import snapshot_download
+
+        snapshot_download("mann-e/mann-e_flux")
+
+        taef1 = AutoencoderTiny.from_pretrained("madebyollin/taef1", torch_dtype=torch.bfloat16)
+        pipe = DiffusionPipeline.from_pretrained(
+            "mann-e/mann-e_flux", torch_dtype=torch.bfloat16, vae=taef1
+        )
+
         pipe.to("cuda")
         self.pipe = optimize(pipe, compile=bool(self.compile))
 
@@ -88,30 +87,27 @@ class Model:
     def inference(self, prompt: str, width: int, height: int, lora: str) -> bytes:
         print("🎨 generating image...")
 
-        pipeline = self.pipe
+        self.pipe.load_lora_weights(lora)
+        self.pipe.fuse_lora(lora_scale=1.0)
 
-        pipeline.load_lora_weights(lora)
-        pipeline.fuse_lora(lora_scale=1.0)
-
-        out = pipeline(
-            f"{prompt}",
+        out = self.pipe(
+            prompt,
             output_type="pil",
             num_inference_steps=NUM_INFERENCE_STEPS,
             width=width,
             height=height,
-            guidance_scale=3.5
+            guidance_scale=3.5,
         ).images[0]
-
-        del pipeline
 
         byte_stream = BytesIO()
         out.save(byte_stream, format="JPEG")
         return byte_stream.getvalue()
 
+
 @app.local_entrypoint()
 def main(
     prompt: str,
-    width: int, 
+    width: int,
     height: int,
     lora: str,
     filename: str,
@@ -127,8 +123,9 @@ def main(
         image_bytes = Model(compile=compile).inference.remote(prompt, width, height, lora)
         print(f"🎨 second inference latency: {time.time() - t0:.2f} seconds")
 
-    output_path = Path(".") / f"{filename}.jpg"
-    output_path.write_bytes(image_bytes)
+    with open(f"{filename}.jpg", "wb") as f:
+        f.write(image_bytes)
+
 
 def optimize(pipe, compile=True):
     return pipe
